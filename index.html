@@ -1,0 +1,723 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Daily Edit | Life Planner</title>
+
+  <style>
+    :root {
+      --pink: #e9a6ba;
+      --pink-dark: #ad536f;
+      --pink-light: #fff0f5;
+      --cream: #fffaf7;
+      --text: #49343e;
+      --muted: #927b85;
+      --border: #f0dce3;
+      --white: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--text);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+    }
+
+    button, a { font: inherit; }
+
+    button { cursor: pointer; }
+
+    .page {
+      max-width: 1180px;
+      margin: auto;
+      padding: 28px 24px 50px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-family: Georgia, serif;
+      font-size: clamp(24px, 4vw, 34px);
+      font-weight: normal;
+      color: var(--pink-dark);
+    }
+
+    .brand span { color: var(--pink); }
+
+    .date-label {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .welcome {
+      padding: 38px 0 24px;
+    }
+
+    .welcome .eyebrow {
+      color: var(--pink-dark);
+      letter-spacing: 2px;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 { font-weight: normal; }
+
+    h1 {
+      font-family: Georgia, serif;
+      font-size: clamp(34px, 6vw, 54px);
+      margin: 12px 0;
+    }
+
+    .welcome p { color: var(--muted); }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin: 24px 0 36px;
+    }
+
+    .tool-card {
+      background: var(--pink-light);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      text-decoration: none;
+      color: var(--text);
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 22px #ad536f15;
+    }
+
+    .tool-icon { font-size: 27px; }
+
+    .tool-card h2 {
+      font-family: Georgia, serif;
+      font-size: 23px;
+      margin: 12px 0 7px;
+    }
+
+    .tool-card p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-family: Georgia, serif;
+      font-size: 29px;
+      margin: 0 0 18px;
+    }
+
+    .calendar-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(270px, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      min-width: 0;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .panel-heading h2 {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      margin: 0;
+    }
+
+    .nav-buttons { display: flex; gap: 6px; }
+
+    .small-button, .primary-button {
+      border: 1px solid var(--border);
+      background: var(--pink-light);
+      color: var(--pink-dark);
+      padding: 9px 13px;
+      border-radius: 10px;
+    }
+
+    .primary-button {
+      background: var(--pink-dark);
+      color: white;
+      border-color: var(--pink-dark);
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .weekdays, .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .weekdays div {
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 8px 0;
+    }
+
+    .day {
+      position: relative;
+      min-width: 0;
+      min-height: 58px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: white;
+      color: var(--text);
+      padding: 7px 2px;
+      text-align: center;
+    }
+
+    .day:hover { background: var(--pink-light); }
+
+    .day.today {
+      border-color: var(--pink);
+      font-weight: bold;
+    }
+
+    .day.selected {
+      background: var(--pink-dark);
+      color: white;
+    }
+
+    .day.muted { color: #c9b9c0; }
+
+    .day.has-events::after {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--pink);
+      bottom: 5px;
+      left: calc(50% - 2px);
+    }
+
+    .day.selected.has-events::after { background: white; }
+
+    .calendar-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 14px 0 0;
+    }
+
+    .agenda-date {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0 0 16px;
+    }
+
+    .event {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+    }
+
+    .event:last-child { border-bottom: 0; }
+
+    .event-marker {
+      width: 4px;
+      min-width: 4px;
+      border-radius: 4px;
+      background: var(--pink);
+    }
+
+    .event-title {
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
+
+    .event-time {
+      font-size: 12px;
+      color: var(--pink-dark);
+      margin-top: 5px;
+    }
+
+    .event-location {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 12px 0;
+    }
+
+    .auth-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .status {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .bottom-link {
+      display: inline-block;
+      color: var(--pink-dark);
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 36px;
+      color: var(--muted);
+      font-family: Georgia, serif;
+    }
+
+    @media (max-width: 760px) {
+      .calendar-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 520px) {
+      .page { padding: 18px 14px 35px; }
+      .tools { grid-template-columns: 1fr; }
+      .panel { padding: 14px; }
+      .day { min-height: 44px; font-size: 13px; }
+      header { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header>
+      <div class="brand">the daily edit <span>♡</span></div>
+      <div id="today-label" class="date-label"></div>
+    </header>
+
+    <section class="welcome">
+      <div class="eyebrow">your little corner of the internet</div>
+      <h1>Let's make today lovely.</h1>
+      <p>A little planning, a little dreaming, and a life you love.</p>
+    </section>
+
+    <section class="tools" aria-label="Your planning tools">
+      <a class="tool-card"
+         href="YOUR_ASSIGNMENT_TRACKER_URL">
+        <div class="tool-icon">🎀</div>
+        <h2>Assignment Tracker</h2>
+        <p>Deadlines, study sessions &amp; staying on top of it all →</p>
+      </a>
+
+      <a class="tool-card"
+         href="YOUR_TRAVEL_PLANNER_URL">
+        <div class="tool-icon">✈️</div>
+        <h2>Travel Planner</h2>
+        <p>Itineraries, reservations &amp; your next adventure →</p>
+      </a>
+    </section>
+
+    <section>
+      <h2 class="section-title">My little agenda ♡</h2>
+
+      <div class="auth-row">
+        <button id="sign-in" class="primary-button"
+                onclick="signIn()" disabled>
+          Connect Google Calendar
+        </button>
+        <button id="sign-out" class="small-button"
+                onclick="signOut()" hidden>
+          Sign out
+        </button>
+        <span id="status" class="status">Loading calendar tools…</span>
+      </div>
+
+      <div class="calendar-layout">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2 id="month-label">Calendar</h2>
+            <div class="nav-buttons">
+              <button class="small-button" onclick="changeMonth(-1)"
+                      aria-label="Previous month">‹</button>
+              <button class="small-button" onclick="changeMonth(1)"
+                      aria-label="Next month">›</button>
+            </div>
+          </div>
+
+          <div class="weekdays" aria-hidden="true">
+            <div>Sun</div><div>Mon</div><div>Tue</div>
+            <div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div id="month-grid" class="month-grid"></div>
+          <p class="calendar-note">
+            Dates with pink dots have events. Select a date to see its schedule.
+          </p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Coming up</h2>
+          </div>
+          <p id="agenda-date" class="agenda-date">Your next seven days</p>
+          <div id="agenda" aria-live="polite">
+            <p class="empty-state">
+              Connect Google Calendar to see your upcoming plans here.
+            </p>
+          </div>
+          <a class="bottom-link"
+             href="https://calendar.google.com/"
+             target="_blank" rel="noopener noreferrer">
+            Open Google Calendar ↗
+          </a>
+        </section>
+      </div>
+    </section>
+
+    <footer>made with love &amp; a little pink ✿</footer>
+  </main>
+
+  <script>
+    // 1. Add your Google credentials here.
+    const CLIENT_ID = "184686566450-urhmgq6r9ikh8g8d1fi7bci249eif1bi.apps.googleusercontent.com";
+    const API_KEY = "AIzaSyDTHZMtmMkJwCiev2sOXySE186wVuWSOeM";
+
+    const DISCOVERY_DOC =
+      "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+    const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+    let tokenClient;
+    let apiReady = false;
+    let authReady = false;
+    let events = [];
+    let visibleMonth = new Date(
+      new Date().getFullYear(), new Date().getMonth(), 1
+    );
+    let selectedDate = dateKey(new Date());
+
+    const $ = id => document.getElementById(id);
+
+    function dateKey(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function parseEventDate(event) {
+      // All-day events have "date"; timed events have "dateTime".
+      if (event.start.date) {
+        const [y, m, d] = event.start.date.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      }
+      return new Date(event.start.dateTime);
+    }
+
+    function formatTime(event) {
+      if (event.start.date) return "All day";
+      return parseEventDate(event).toLocaleTimeString([], {
+        hour: "numeric", minute: "2-digit"
+      });
+    }
+
+    function startOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function initPage() {
+      $("today-label").textContent = new Date().toLocaleDateString(
+        undefined, { weekday: "long", month: "long", day: "numeric" }
+      );
+      drawMonth();
+    }
+
+    function setStatus(message) {
+      $("status").textContent = message;
+    }
+
+    function maybeEnableSignIn() {
+      if (apiReady && authReady) {
+        $("sign-in").disabled = false;
+        setStatus("Ready to connect your calendar.");
+      }
+    }
+
+    // Google API scripts call these functions when loaded.
+    function gapiLoaded() {
+      gapi.load("client", async () => {
+        try {
+          await gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: [DISCOVERY_DOC]
+          });
+          apiReady = true;
+          maybeEnableSignIn();
+        } catch (error) {
+          setStatus("Could not initialize Google Calendar. Check your API key.");
+          console.error(error);
+        }
+      });
+    }
+
+    function gisLoaded() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: async response => {
+          if (response.error) {
+            setStatus("Google sign-in was not completed.");
+            return;
+          }
+          $("sign-in").textContent = "Refresh events";
+          $("sign-out").hidden = false;
+          await loadEvents();
+        }
+      });
+      authReady = true;
+      maybeEnableSignIn();
+    }
+
+    function signIn() {
+      if (!apiReady || !authReady) return;
+      tokenClient.requestAccessToken({
+        prompt: gapi.client.getToken() ? "" : "consent"
+      });
+    }
+
+    function signOut() {
+      const token = gapi.client.getToken();
+      if (token) google.accounts.oauth2.revoke(token.access_token);
+      gapi.client.setToken("");
+      events = [];
+      $("sign-in").textContent = "Connect Google Calendar";
+      $("sign-out").hidden = true;
+      setStatus("Calendar disconnected.");
+      drawMonth();
+      drawAgenda();
+    }
+
+    async function loadEvents() {
+      setStatus("Loading your events…");
+
+      // Load the visible month and the following month so the
+      // upcoming agenda can still show events near month-end.
+      const start = new Date(
+        visibleMonth.getFullYear(), visibleMonth.getMonth(), 1
+      );
+      const end = new Date(
+        visibleMonth.getFullYear(), visibleMonth.getMonth() + 2, 1
+      );
+
+      try {
+        const response = await gapi.client.calendar.events.list({
+          calendarId: "primary",
+          timeMin: start.toISOString(),
+          timeMax: end.toISOString(),
+          singleEvents: true,
+          orderBy: "startTime",
+          maxResults: 2500,
+          showDeleted: false
+        });
+
+        events = response.result.items || [];
+        setStatus("Calendar connected ♡");
+        drawMonth();
+        drawAgenda();
+      } catch (error) {
+        console.error(error);
+        setStatus("Couldn't load events. Check permissions and API settings.");
+      }
+    }
+
+    function eventsOn(date) {
+      const key = dateKey(date);
+      return events.filter(event => {
+        const start = event.start.date || dateKey(parseEventDate(event));
+        const end = event.end.date ||
+          (event.end.dateTime ? dateKey(new Date(event.end.dateTime)) : start);
+
+        // All-day event end dates are exclusive in Google Calendar.
+        return event.start.date
+          ? key >= start && key < end
+          : dateKey(parseEventDate(event)) === key;
+      });
+    }
+
+    function drawMonth() {
+      $("month-label").textContent = visibleMonth.toLocaleDateString(
+        undefined, { month: "long", year: "numeric" }
+      );
+
+      const grid = $("month-grid");
+      grid.replaceChildren();
+
+      const year = visibleMonth.getFullYear();
+      const month = visibleMonth.getMonth();
+      const firstWeekday = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const previousMonthDays = new Date(year, month, 0).getDate();
+      const today = dateKey(new Date());
+
+      for (let i = 0; i < 42; i++) {
+        let date;
+        let outside = false;
+
+        if (i < firstWeekday) {
+          date = new Date(year, month - 1, previousMonthDays - firstWeekday + i + 1);
+          outside = true;
+        } else if (i >= firstWeekday + daysInMonth) {
+          date = new Date(year, month + 1, i - firstWeekday - daysInMonth + 1);
+          outside = true;
+        } else {
+          date = new Date(year, month, i - firstWeekday + 1);
+        }
+
+        const key = dateKey(date);
+        const button = document.createElement("button");
+        button.className = "day";
+        button.textContent = date.getDate();
+        button.setAttribute("aria-label", date.toLocaleDateString());
+
+        if (outside) button.classList.add("muted");
+        if (key === today) button.classList.add("today");
+        if (key === selectedDate) button.classList.add("selected");
+        if (eventsOn(date).length) button.classList.add("has-events");
+
+        button.addEventListener("click", () => {
+          selectedDate = key;
+          if (date.getMonth() !== visibleMonth.getMonth() ||
+              date.getFullYear() !== visibleMonth.getFullYear()) {
+            visibleMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+            if (gapi.client.getToken()) loadEvents();
+          }
+          drawMonth();
+          drawAgenda(date);
+        });
+
+        grid.appendChild(button);
+      }
+    }
+
+    function changeMonth(amount) {
+      visibleMonth = new Date(
+        visibleMonth.getFullYear(), visibleMonth.getMonth() + amount, 1
+      );
+      drawMonth();
+      if (gapiReadyAndSignedIn()) loadEvents();
+    }
+
+    function gapiReadyAndSignedIn() {
+      return apiReady && gapi.client.getToken() !== null;
+    }
+
+    function drawAgenda(chosenDate) {
+      const agenda = $("agenda");
+      agenda.replaceChildren();
+
+      const now = new Date();
+      const from = chosenDate ? startOfDay(chosenDate) : startOfDay(now);
+      const until = new Date(from);
+      until.setDate(until.getDate() + (chosenDate ? 1 : 7));
+
+      $("agenda-date").textContent = chosenDate
+        ? chosenDate.toLocaleDateString(undefined, {
+            weekday: "long", month: "long", day: "numeric"
+          })
+        : "Your next seven days";
+
+      const upcoming = events.filter(event => {
+        const start = parseEventDate(event);
+        const eventDay = startOfDay(start);
+        if (chosenDate) return eventDay.getTime() === from.getTime();
+        return eventDay >= from && eventDay < until &&
+          (event.start.date || start >= now);
+      }).sort((a, b) => parseEventDate(a) - parseEventDate(b));
+
+      if (!upcoming.length) {
+        const message = document.createElement("p");
+        message.className = "empty-state";
+        message.textContent = gapiReadyAndSignedIn()
+          ? "Nothing scheduled here. Enjoy a little breathing room ♡"
+          : "Connect Google Calendar to see your plans here.";
+        agenda.appendChild(message);
+        return;
+      }
+
+      upcoming.forEach(event => {
+        const card = document.createElement("div");
+        card.className = "event";
+
+        const marker = document.createElement("div");
+        marker.className = "event-marker";
+
+        const details = document.createElement("div");
+        details.style.minWidth = "0";
+
+        const title = document.createElement("div");
+        title.className = "event-title";
+        title.textContent = event.summary || "(Untitled event)";
+
+        const time = document.createElement("div");
+        time.className = "event-time";
+        time.textContent = `${formatTime(event)} · ${
+          parseEventDate(event).toLocaleDateString(undefined, {
+            month: "short", day: "numeric"
+          })
+        }`;
+
+        details.append(title, time);
+
+        if (event.location) {
+          const location = document.createElement("div");
+          location.className = "event-location";
+          location.textContent = event.location;
+          details.appendChild(location);
+        }
+
+        card.append(marker, details);
+        agenda.appendChild(card);
+      });
+    }
+
+    initPage();
+  </script>
+
+  <script async defer
+    src="https://apis.google.com/js/api.js"
+    onload="gapiLoaded()"></script>
+  <script async defer
+    src="https://accounts.google.com/gsi/client"
+    onload="gisLoaded()"></script>
+</body>
+</html>
